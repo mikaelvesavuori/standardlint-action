@@ -10998,6 +10998,7 @@ function getConfig(basePath, filePath) {
 function createCheck(payload, result) {
     var _a, _b, _c, _d;
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
+        console.log('PAYLOAD --->', payload);
         const [owner, repo] = GITHUB_REPOSITORY.split('/');
         const statuses = result.results.map((result) => result.status);
         const hasPassedAllTests = !statuses.some((status) => status === 'fail');
