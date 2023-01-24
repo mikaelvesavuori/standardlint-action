@@ -10995,18 +10995,20 @@ function getConfig(basePath, filePath) {
     }
 }
 function createCheck(payload, result) {
+    var _a, _b, _c, _d;
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         const [owner, repo] = GITHUB_REPOSITORY.split('/');
         const statuses = result.results.map((result) => result.status);
         const hasPassedAllTests = !statuses.some((status) => status === 'fail');
         const { passes, warnings, failures } = result;
         const time = new Date().toISOString();
+        const sha = ((_a = payload === null || payload === void 0 ? void 0 : payload.head_commit) === null || _a === void 0 ? void 0 : _a.id) || ((_d = (_c = (_b = payload === null || payload === void 0 ? void 0 : payload.event) === null || _b === void 0 ? void 0 : _b.pull_request) === null || _c === void 0 ? void 0 : _c.head) === null || _d === void 0 ? void 0 : _d.sha) || '';
         const octokit = github.getOctokit(GITHUB_TOKEN);
         yield octokit.rest.checks.create({
             owner,
             repo,
             name: 'StandardLint audit',
-            head_sha: payload.head_commit.id,
+            head_sha: sha,
             started_at: time,
             completed_at: time,
             status: 'completed',
