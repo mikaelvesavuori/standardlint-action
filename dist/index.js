@@ -11002,7 +11002,10 @@ function createCheck(payload, result) {
         const hasPassedAllTests = !statuses.some((status) => status === 'fail');
         const { passes, warnings, failures } = result;
         const time = new Date().toISOString();
-        const sha = ((_a = payload === null || payload === void 0 ? void 0 : payload.head_commit) === null || _a === void 0 ? void 0 : _a.id) || ((_d = (_c = (_b = payload === null || payload === void 0 ? void 0 : payload.event) === null || _b === void 0 ? void 0 : _b.pull_request) === null || _c === void 0 ? void 0 : _c.head) === null || _d === void 0 ? void 0 : _d.sha) || '';
+        const sha = ((_a = payload === null || payload === void 0 ? void 0 : payload.head_commit) === null || _a === void 0 ? void 0 : _a.id) ||
+            ((_d = (_c = (_b = payload === null || payload === void 0 ? void 0 : payload.event) === null || _b === void 0 ? void 0 : _b.pull_request) === null || _c === void 0 ? void 0 : _c.head) === null || _d === void 0 ? void 0 : _d.sha) ||
+            (payload === null || payload === void 0 ? void 0 : payload.sha) ||
+            'UNKNOWN';
         const octokit = github.getOctokit(GITHUB_TOKEN);
         yield octokit.rest.checks.create({
             owner,

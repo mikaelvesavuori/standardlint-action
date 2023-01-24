@@ -53,7 +53,11 @@ async function createCheck(payload: Record<string, any>, result: Record<string, 
   const { passes, warnings, failures } = result;
 
   const time = new Date().toISOString();
-  const sha = payload?.head_commit?.id || payload?.event?.pull_request?.head?.sha || '';
+  const sha =
+    payload?.head_commit?.id ||
+    payload?.event?.pull_request?.head?.sha ||
+    payload?.sha ||
+    'UNKNOWN';
 
   const octokit = github.getOctokit(GITHUB_TOKEN);
   await octokit.rest.checks.create({
