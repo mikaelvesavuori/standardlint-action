@@ -11,6 +11,9 @@ The only thing you need to run this action is a `standardlint.json` configuratio
 ```yml
 on: [push]
 
+permissions:
+  checks: write
+
 jobs:
   main:
     runs-on: ubuntu-latest
