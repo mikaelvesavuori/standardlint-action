@@ -1,0 +1,53 @@
+{
+  "name": "standardlint-action",
+  "description": "Runs StandardLint, an extensible standards linter and auditor.",
+  "version": "0.0.1",
+  "author": "Mikael Vesavuori",
+  "license": "MIT",
+  "keywords": [
+    "devops",
+    "software-delivery",
+    "ci-checks",
+    "linter",
+    "audit",
+    "test-automation",
+    "standards",
+    "compliance",
+    "auditor",
+    "engops"
+  ],
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikaelvesavuori/standardlint-action"
+  },
+  "bugs": {
+    "url": "https://github.com/mikaelvesavuori/standardlint-action/issues"
+  },
+  "homepage": "https://github.com/mikaelvesavuori/standardlint-action",
+  "scripts": {
+    "start": "npx ts-node index.ts",
+    "build": "npm run build:clean && npm run build:ncc",
+    "build:clean": "rm -rf dist && mkdir -p dist",
+    "build:ncc": "npx ncc build index.ts --license licenses.txt"
+  },
+  "dependencies": {
+    "@actions/core": "1",
+    "@actions/github": "5",
+    "@octokit/action": "4",
+    "standardlint": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@typescript-eslint/eslint-plugin": "5",
+    "@typescript-eslint/parser": "5",
+    "@vercel/ncc": "^0.36.0",
+    "eslint": "8",
+    "eslint-config-prettier": "8",
+    "eslint-plugin-prettier": "4",
+    "prettier": "2",
+    "ts-node": "latest",
+    "tslib": "latest",
+    "typescript": "4"
+  }
+}

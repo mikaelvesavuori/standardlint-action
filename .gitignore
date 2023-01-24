@@ -1,0 +1,8 @@
+.dccache
+.env
+node_modules/
+.serverless/
+.webpack/
+build/
+!dist/
+coverage/

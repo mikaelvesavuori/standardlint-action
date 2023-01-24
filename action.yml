@@ -1,0 +1,8 @@
+name: 'standardlint-action'
+description: 'Runs StandardLint, an extensible standards linter and auditor.'
+branding:
+  icon: 'activity'
+  color: 'blue'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
