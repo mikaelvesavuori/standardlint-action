@@ -47,8 +47,6 @@ function getConfig(basePath: string, filePath: string) {
  * @description Produce and create the GitHub Check with annotations.
  */
 async function createCheck(payload: Record<string, any>, result: Record<string, any>) {
-  console.log('PAYLOAD --->', payload);
-
   const [owner, repo] = GITHUB_REPOSITORY.split('/');
 
   const statuses = result.results.map((result: Record<string, any>) => result.status);
