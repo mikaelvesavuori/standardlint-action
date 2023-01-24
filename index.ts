@@ -53,13 +53,14 @@ async function createCheck(payload: Record<string, any>, result: Record<string, 
   const { passes, warnings, failures } = result;
 
   const time = new Date().toISOString();
+  const sha = payload.head_commit.id || payload.event.pull_request.head.sha || '';
 
   const octokit = github.getOctokit(GITHUB_TOKEN);
   await octokit.rest.checks.create({
     owner,
     repo,
     name: 'StandardLint audit',
-    head_sha: payload.head_commit.id,
+    head_sha: sha,
     started_at: time,
     completed_at: time,
     status: 'completed',
