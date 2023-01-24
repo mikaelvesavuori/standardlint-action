@@ -10,6 +10,8 @@ const GITHUB_WORKSPACE = process.env.GITHUB_WORKSPACE || '';
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
 const GITHUB_REPOSITORY = process.env.GITHUB_REPOSITORY || '';
 
+const octokit = github.getOctokit(GITHUB_TOKEN);
+
 /**
  * @description Orchestrates the action.
  */
@@ -59,7 +61,6 @@ async function createCheck(payload: Record<string, any>, result: Record<string, 
     payload?.sha ||
     'UNKNOWN';
 
-  const octokit = github.getOctokit(GITHUB_TOKEN);
   await octokit.rest.checks.create({
     owner,
     repo,
