@@ -10996,7 +10996,7 @@ function getConfig(basePath, filePath) {
     }
 }
 function createCheck(payload, result) {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e, _f;
     return tslib_1.__awaiter(this, void 0, void 0, function* () {
         console.log('PAYLOAD --->', payload);
         const [owner, repo] = GITHUB_REPOSITORY.split('/');
@@ -11005,7 +11005,8 @@ function createCheck(payload, result) {
         const { passes, warnings, failures } = result;
         const time = new Date().toISOString();
         const sha = ((_a = payload === null || payload === void 0 ? void 0 : payload.head_commit) === null || _a === void 0 ? void 0 : _a.id) ||
-            ((_d = (_c = (_b = payload === null || payload === void 0 ? void 0 : payload.event) === null || _b === void 0 ? void 0 : _b.pull_request) === null || _c === void 0 ? void 0 : _c.head) === null || _d === void 0 ? void 0 : _d.sha) ||
+            ((_c = (_b = payload === null || payload === void 0 ? void 0 : payload.pull_request) === null || _b === void 0 ? void 0 : _b.head) === null || _c === void 0 ? void 0 : _c.sha) ||
+            ((_f = (_e = (_d = payload === null || payload === void 0 ? void 0 : payload.event) === null || _d === void 0 ? void 0 : _d.pull_request) === null || _e === void 0 ? void 0 : _e.head) === null || _f === void 0 ? void 0 : _f.sha) ||
             (payload === null || payload === void 0 ? void 0 : payload.sha) ||
             'UNKNOWN';
         yield octokit.rest.checks.create({

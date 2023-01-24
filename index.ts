@@ -59,6 +59,7 @@ async function createCheck(payload: Record<string, any>, result: Record<string, 
   const time = new Date().toISOString();
   const sha =
     payload?.head_commit?.id ||
+    payload?.pull_request?.head?.sha ||
     payload?.event?.pull_request?.head?.sha ||
     payload?.sha ||
     'UNKNOWN';
