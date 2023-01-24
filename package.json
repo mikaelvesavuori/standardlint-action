@@ -1,7 +1,7 @@
 {
   "name": "standardlint-action",
   "description": "Runs StandardLint, an extensible standards linter and auditor.",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": "Mikael Vesavuori",
   "license": "MIT",
   "keywords": [
