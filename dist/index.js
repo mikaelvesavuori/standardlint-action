@@ -6454,6 +6454,11 @@ function onceStrict (fn) {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.calculatePass = void 0;
+/**
+ * @description Utility function that assists with return a false passing result
+ * only if the severity threshold is `error`, else warns on failures, and
+ * returns true for anything else.
+ */
 function calculatePass(predicatePassResult, severity) {
     if (!predicatePassResult && severity === 'error')
         return 'fail';
@@ -6472,6 +6477,9 @@ exports.calculatePass = calculatePass;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MissingChecksError = void 0;
+/**
+ * @description Used when StandardLint is being run but no checks are defined.
+ */
 class MissingChecksError extends Error {
     constructor() {
         super();
@@ -6491,6 +6499,9 @@ exports.MissingChecksError = MissingChecksError;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getStatusCount = void 0;
+/**
+ * @description Gets the number of count for a given status.
+ */
 const getStatusCount = (status, results) => results
     .map((result) => {
     if (result.status === status)
@@ -6509,12 +6520,15 @@ exports.getStatusCount = getStatusCount;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkForConflictingLockfiles = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const exists_1 = __nccwpck_require2_(963);
+/**
+ * @description Checks if there are conflicting Node package lock files.
+ */
 function checkForConflictingLockfiles(severity, basePath) {
     const name = 'Lock files';
     const message = 'Check for conflicting lock files';
-    const npmLockfile = (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(basePath, 'package-lock.json');
-    const yarnLockfile = (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(basePath, 'yarn.lock');
+    const npmLockfile = (0, exists_1.exists)(basePath, 'package-lock.json');
+    const yarnLockfile = (0, exists_1.exists)(basePath, 'yarn.lock');
     const result = !(npmLockfile && yarnLockfile);
     return {
         name,
@@ -6528,6 +6542,43 @@ exports.checkForConflictingLockfiles = checkForConflictingLockfiles;
 
 /***/ }),
 
+/***/ 687:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require2_) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.checkForConsoleUsage = void 0;
+const calculatePass_1 = __nccwpck_require2_(906);
+const logDefaultPathMessage_1 = __nccwpck_require2_(664);
+const getAllFiles_1 = __nccwpck_require2_(424);
+const readFile_1 = __nccwpck_require2_(617);
+const filterFiles_1 = __nccwpck_require2_(73);
+/**
+ * @description Checks if there is an API schema.
+ */
+function checkForConsoleUsage(severity, basePath, customPath, ignorePaths) {
+    const path = customPath || 'src';
+    const name = 'Console usage';
+    const message = 'Check for console usage';
+    if (!customPath)
+        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, path);
+    const files = (0, getAllFiles_1.getAllFiles)(`${basePath}/${path}`, []);
+    const filteredFiles = ignorePaths && ignorePaths.length > 0 ? (0, filterFiles_1.filterFiles)(files, ignorePaths) : files;
+    const regex = /console.(.*)/gi;
+    const includesConsole = filteredFiles.map((test) => regex.test((0, readFile_1.readFile)(test)));
+    const result = !includesConsole.includes(true); // We don't want any occurrences
+    return {
+        name,
+        status: (0, calculatePass_1.calculatePass)(result, severity),
+        message,
+        path
+    };
+}
+exports.checkForConsoleUsage = checkForConsoleUsage;
+
+
+/***/ }),
+
 /***/ 145:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require2_) => {
 
@@ -6537,19 +6588,22 @@ exports.checkForDefinedRelations = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
 const logDefaultPathMessage_1 = __nccwpck_require2_(664);
 const getJSONFileContents_1 = __nccwpck_require2_(841);
+/**
+ * @description Checks if the service metadata defines system relations.
+ */
 function checkForDefinedRelations(severity, basePath, customPath) {
-    const SERVICE_METADATA_FILE_PATH = customPath || 'manifest.json';
+    const path = customPath || 'manifest.json';
     const name = 'Relations';
     const message = 'Check for defined relations';
     if (!customPath)
-        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, SERVICE_METADATA_FILE_PATH);
-    const serviceMetadata = (0, getJSONFileContents_1.getJSONFileContents)(basePath, SERVICE_METADATA_FILE_PATH);
+        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, path);
+    const serviceMetadata = (0, getJSONFileContents_1.getJSONFileContents)(basePath, path);
     const result = serviceMetadata && serviceMetadata?.relations && serviceMetadata?.relations.length > 0;
     return {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: SERVICE_METADATA_FILE_PATH
+        path
     };
 }
 exports.checkForDefinedRelations = checkForDefinedRelations;
@@ -6566,19 +6620,22 @@ exports.checkForDefinedServiceLevelObjectives = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
 const logDefaultPathMessage_1 = __nccwpck_require2_(664);
 const getJSONFileContents_1 = __nccwpck_require2_(841);
+/**
+ * @description Checks if the service metadata defines Service Level Objectives.
+ */
 function checkForDefinedServiceLevelObjectives(severity, basePath, customPath) {
-    const SERVICE_METADATA_FILE_PATH = customPath || 'manifest.json';
+    const path = customPath || 'manifest.json';
     const name = 'SLOs';
     const message = 'Check for defined Service Level Objectives';
     if (!customPath)
-        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, SERVICE_METADATA_FILE_PATH);
-    const serviceMetadata = (0, getJSONFileContents_1.getJSONFileContents)(basePath, SERVICE_METADATA_FILE_PATH);
+        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, path);
+    const serviceMetadata = (0, getJSONFileContents_1.getJSONFileContents)(basePath, path);
     const result = serviceMetadata && serviceMetadata?.slo && serviceMetadata?.slo.length > 0;
     return {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: SERVICE_METADATA_FILE_PATH
+        path
     };
 }
 exports.checkForDefinedServiceLevelObjectives = checkForDefinedServiceLevelObjectives;
@@ -6595,19 +6652,22 @@ exports.checkForDefinedTags = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
 const logDefaultPathMessage_1 = __nccwpck_require2_(664);
 const getJSONFileContents_1 = __nccwpck_require2_(841);
+/**
+ * @description Checks if the service metadata defines tags.
+ */
 function checkForDefinedTags(severity, basePath, customPath) {
-    const SERVICE_METADATA_FILE_PATH = customPath || 'manifest.json';
+    const path = customPath || 'manifest.json';
     const name = 'Tags';
     const message = 'Check for defined tags';
     if (!customPath)
-        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, SERVICE_METADATA_FILE_PATH);
-    const serviceMetadata = (0, getJSONFileContents_1.getJSONFileContents)(basePath, SERVICE_METADATA_FILE_PATH);
+        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, path);
+    const serviceMetadata = (0, getJSONFileContents_1.getJSONFileContents)(basePath, path);
     const result = serviceMetadata && serviceMetadata?.spec?.tags && serviceMetadata?.spec?.tags.length > 0;
     return {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: SERVICE_METADATA_FILE_PATH
+        path
     };
 }
 exports.checkForDefinedTags = checkForDefinedTags;
@@ -6622,20 +6682,23 @@ exports.checkForDefinedTags = checkForDefinedTags;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkForPresenceApiSchema = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const exists_1 = __nccwpck_require2_(963);
 const logDefaultPathMessage_1 = __nccwpck_require2_(664);
+/**
+ * @description Checks if there is an API schema.
+ */
 function checkForPresenceApiSchema(severity, basePath, customPath) {
-    const API_SCHEMA_PATH = customPath || 'api/schema.json';
+    const path = customPath || 'api/schema.json';
     const name = 'API schema';
     const message = 'Check for API schema';
     if (!customPath)
-        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, API_SCHEMA_PATH);
-    const result = (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(basePath, API_SCHEMA_PATH);
+        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, path);
+    const result = (0, exists_1.exists)(basePath, path);
     return {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: API_SCHEMA_PATH
+        path
     };
 }
 exports.checkForPresenceApiSchema = checkForPresenceApiSchema;
@@ -6650,17 +6713,20 @@ exports.checkForPresenceApiSchema = checkForPresenceApiSchema;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkForPresenceChangelog = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const exists_1 = __nccwpck_require2_(963);
+/**
+ * @description Checks if there is a `CHANGELOG.md` file.
+ */
 function checkForPresenceChangelog(severity, basePath) {
-    const CHANGELOG_FILE_PATH = 'CHANGELOG.md';
+    const path = 'CHANGELOG.md';
     const name = 'Changelog';
     const message = 'Check for CHANGELOG file';
-    const result = (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(basePath, CHANGELOG_FILE_PATH);
+    const result = (0, exists_1.exists)(basePath, path);
     return {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: CHANGELOG_FILE_PATH
+        path
     };
 }
 exports.checkForPresenceChangelog = checkForPresenceChangelog;
@@ -6675,20 +6741,23 @@ exports.checkForPresenceChangelog = checkForPresenceChangelog;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkForPresenceCiConfig = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const exists_1 = __nccwpck_require2_(963);
 const logDefaultPathMessage_1 = __nccwpck_require2_(664);
+/**
+ * @description Checks if there is a CI/CD configuration file.
+ */
 function checkForPresenceCiConfig(severity, basePath, customPath) {
-    const CONFIG_PATH = customPath || '.github/workflows/main.yml';
+    const path = customPath || '.github/workflows/main.yml';
     const name = 'CI configuration';
     const message = 'Check for CI configuration file';
     if (!customPath)
-        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, CONFIG_PATH);
-    const result = (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(basePath, CONFIG_PATH);
+        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, path);
+    const result = (0, exists_1.exists)(basePath, path);
     return {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: CONFIG_PATH
+        path
     };
 }
 exports.checkForPresenceCiConfig = checkForPresenceCiConfig;
@@ -6703,17 +6772,20 @@ exports.checkForPresenceCiConfig = checkForPresenceCiConfig;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkForPresenceCodeowners = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const exists_1 = __nccwpck_require2_(963);
+/**
+ * @description Checks if there is a `CODEOWNERS` file.
+ */
 function checkForPresenceCodeowners(severity, basePath) {
-    const CODEOWNERS_FILE_PATH = 'CODEOWNERS';
+    const path = 'CODEOWNERS';
     const name = 'Code owners';
     const message = 'Check for CODEOWNERS file';
-    const result = (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(basePath, CODEOWNERS_FILE_PATH);
+    const result = (0, exists_1.exists)(basePath, path);
     return {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: CODEOWNERS_FILE_PATH
+        path
     };
 }
 exports.checkForPresenceCodeowners = checkForPresenceCodeowners;
@@ -6728,17 +6800,20 @@ exports.checkForPresenceCodeowners = checkForPresenceCodeowners;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkForPresenceContributing = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const exists_1 = __nccwpck_require2_(963);
+/**
+ * @description Checks if there is a `CONTRIBUTING.md` file.
+ */
 function checkForPresenceContributing(severity, basePath) {
-    const CONTRIBUTING_FILE_PATH = 'CONTRIBUTING.md';
+    const path = 'CONTRIBUTING.md';
     const name = 'Contribution information';
     const message = 'Check for CONTRIBUTING file';
-    const result = (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(basePath, CONTRIBUTING_FILE_PATH);
+    const result = (0, exists_1.exists)(basePath, path);
     return {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: CONTRIBUTING_FILE_PATH
+        path
     };
 }
 exports.checkForPresenceContributing = checkForPresenceContributing;
@@ -6753,19 +6828,22 @@ exports.checkForPresenceContributing = checkForPresenceContributing;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkForPresenceDiagramsFolder = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
-const getDirectoryContents_1 = __nccwpck_require2_(141);
+const exists_1 = __nccwpck_require2_(963);
+const readDirectory_1 = __nccwpck_require2_(128);
 const logDefaultPathMessage_1 = __nccwpck_require2_(664);
+/**
+ * @description Checks if there is a diagrams folder with diagram files in it.
+ */
 function checkForPresenceDiagramsFolder(severity, basePath, customPath) {
-    const DIAGRAMS_FOLDER = customPath || 'diagrams';
+    const path = customPath || 'diagrams';
     const name = 'Diagrams';
     const message = 'Check for diagrams folder with contents';
     if (!customPath)
-        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, DIAGRAMS_FOLDER);
+        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, path);
     const result = (() => {
-        const diagramsPath = `${basePath}/${DIAGRAMS_FOLDER}`;
-        if ((0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(diagramsPath)) {
-            const contents = (0, getDirectoryContents_1.getDirectoryContents)(diagramsPath);
+        const diagramsPath = `${basePath}/${path}`;
+        if ((0, exists_1.exists)(diagramsPath)) {
+            const contents = (0, readDirectory_1.readDirectory)(diagramsPath);
             const diagramMatches = contents
                 .map((fileName) => fileName.endsWith('.drawio'))
                 .filter((match) => match);
@@ -6777,7 +6855,7 @@ function checkForPresenceDiagramsFolder(severity, basePath, customPath) {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: DIAGRAMS_FOLDER
+        path
     };
 }
 exports.checkForPresenceDiagramsFolder = checkForPresenceDiagramsFolder;
@@ -6792,20 +6870,23 @@ exports.checkForPresenceDiagramsFolder = checkForPresenceDiagramsFolder;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkForPresenceIacConfig = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const exists_1 = __nccwpck_require2_(963);
 const logDefaultPathMessage_1 = __nccwpck_require2_(664);
+/**
+ * @description Checks if there is Infrastructure-as-Code configuration present.
+ */
 function checkForPresenceIacConfig(severity, basePath, customPath) {
-    const IAC_CONFIG_PATH = customPath || 'serverless.yml';
+    const path = customPath || 'serverless.yml';
     const name = 'IAC configuration';
     const message = 'Check for Infrastructure-as-Code configuration';
     if (!customPath)
-        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, IAC_CONFIG_PATH);
-    const result = (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(basePath, IAC_CONFIG_PATH);
+        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, path);
+    const result = (0, exists_1.exists)(basePath, path);
     return {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: basePath
+        path
     };
 }
 exports.checkForPresenceIacConfig = checkForPresenceIacConfig;
@@ -6820,17 +6901,20 @@ exports.checkForPresenceIacConfig = checkForPresenceIacConfig;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkForPresenceLicense = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const exists_1 = __nccwpck_require2_(963);
+/**
+ * @description Checks if there is a `LICENSE.md` file.
+ */
 function checkForPresenceLicense(severity, basePath) {
-    const LICENSE_FILE_PATH = 'LICENSE.md';
+    const path = 'LICENSE.md';
     const name = 'License';
     const message = 'Check for LICENSE file';
-    const result = (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(basePath, LICENSE_FILE_PATH);
+    const result = (0, exists_1.exists)(basePath, path);
     return {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: LICENSE_FILE_PATH
+        path
     };
 }
 exports.checkForPresenceLicense = checkForPresenceLicense;
@@ -6845,17 +6929,20 @@ exports.checkForPresenceLicense = checkForPresenceLicense;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkForPresenceReadme = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const exists_1 = __nccwpck_require2_(963);
+/**
+ * @description Checks if there is a `README.md` file.
+ */
 function checkForPresenceReadme(severity, basePath) {
-    const README_FILE_PATH = 'README.md';
+    const path = 'README.md';
     const name = 'Documentation';
     const message = 'Check for README file';
-    const result = (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(basePath, README_FILE_PATH);
+    const result = (0, exists_1.exists)(basePath, path);
     return {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: README_FILE_PATH
+        path
     };
 }
 exports.checkForPresenceReadme = checkForPresenceReadme;
@@ -6870,17 +6957,20 @@ exports.checkForPresenceReadme = checkForPresenceReadme;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkForPresenceSecurity = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const exists_1 = __nccwpck_require2_(963);
+/**
+ * @description Checks if there is a `SECURITY.md` file.
+ */
 function checkForPresenceSecurity(severity, basePath) {
-    const SECURITY_FILE_PATH = 'SECURITY.md';
+    const path = 'SECURITY.md';
     const name = 'Security information';
     const message = 'Check for SECURITY file';
-    const result = (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(basePath, SECURITY_FILE_PATH);
+    const result = (0, exists_1.exists)(basePath, path);
     return {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: SECURITY_FILE_PATH
+        path
     };
 }
 exports.checkForPresenceSecurity = checkForPresenceSecurity;
@@ -6895,20 +6985,23 @@ exports.checkForPresenceSecurity = checkForPresenceSecurity;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkForPresenceServiceMetadata = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const exists_1 = __nccwpck_require2_(963);
 const logDefaultPathMessage_1 = __nccwpck_require2_(664);
+/**
+ * @description Checks if there a service metadata file present.
+ */
 function checkForPresenceServiceMetadata(severity, basePath, customPath) {
-    const SERVICE_METADATA_FILE_PATH = customPath || 'manifest.json';
+    const path = customPath || 'manifest.json';
     const name = 'Service metadata';
     const message = 'Check for service metadata file';
     if (!customPath)
-        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, SERVICE_METADATA_FILE_PATH);
-    const result = (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(basePath, SERVICE_METADATA_FILE_PATH);
+        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, path);
+    const result = (0, exists_1.exists)(basePath, path);
     return {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: SERVICE_METADATA_FILE_PATH
+        path
     };
 }
 exports.checkForPresenceServiceMetadata = checkForPresenceServiceMetadata;
@@ -6923,20 +7016,23 @@ exports.checkForPresenceServiceMetadata = checkForPresenceServiceMetadata;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkForPresenceTemplateIssues = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const exists_1 = __nccwpck_require2_(963);
 const logDefaultPathMessage_1 = __nccwpck_require2_(664);
+/**
+ * @description Checks if there is a template for GitHub issues.
+ */
 function checkForPresenceTemplateIssues(severity, basePath, customPath) {
-    const TEMPLATE_FILE_PATH = customPath || '.github/ISSUE_TEMPLATE/issue.md';
+    const path = customPath || '.github/ISSUE_TEMPLATE/issue.md';
     const name = 'Issue template';
     const message = 'Check for GitHub issue template';
     if (!customPath)
-        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, TEMPLATE_FILE_PATH);
-    const result = (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(basePath, TEMPLATE_FILE_PATH);
+        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, path);
+    const result = (0, exists_1.exists)(basePath, path);
     return {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: TEMPLATE_FILE_PATH
+        path
     };
 }
 exports.checkForPresenceTemplateIssues = checkForPresenceTemplateIssues;
@@ -6951,23 +7047,101 @@ exports.checkForPresenceTemplateIssues = checkForPresenceTemplateIssues;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkForPresenceTemplatePullRequests = void 0;
 const calculatePass_1 = __nccwpck_require2_(906);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const exists_1 = __nccwpck_require2_(963);
 const logDefaultPathMessage_1 = __nccwpck_require2_(664);
+/**
+ * @description Checks if there is a template for GitHub Pull Requests.
+ */
 function checkForPresenceTemplatePullRequests(severity, basePath, customPath) {
-    const TEMPLATE_FILE_PATH = customPath || '.github/ISSUE_TEMPLATE/pull_request.md';
+    const path = customPath || '.github/ISSUE_TEMPLATE/pull_request.md';
     const name = 'PR template';
     const message = 'Check for GitHub Pull Request template';
     if (!customPath)
-        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, TEMPLATE_FILE_PATH);
-    const result = (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(basePath, TEMPLATE_FILE_PATH);
+        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, path);
+    const result = (0, exists_1.exists)(basePath, path);
     return {
         name,
         status: (0, calculatePass_1.calculatePass)(result, severity),
         message,
-        path: TEMPLATE_FILE_PATH
+        path
     };
 }
 exports.checkForPresenceTemplatePullRequests = checkForPresenceTemplatePullRequests;
+
+
+/***/ }),
+
+/***/ 943:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require2_) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.checkForPresenceTests = void 0;
+const calculatePass_1 = __nccwpck_require2_(906);
+const logDefaultPathMessage_1 = __nccwpck_require2_(664);
+const getAllFiles_1 = __nccwpck_require2_(424);
+const filterFiles_1 = __nccwpck_require2_(73);
+/**
+ * @description Checks if there are tests.
+ */
+function checkForPresenceTests(severity, basePath, customPath, ignorePaths) {
+    const path = customPath || 'tests';
+    const name = 'Tests';
+    const message = 'Check for presence of tests';
+    if (!customPath)
+        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, path);
+    const files = (0, getAllFiles_1.getAllFiles)(`${basePath}/${path}`, []);
+    const filteredFiles = ignorePaths && ignorePaths.length > 0 ? (0, filterFiles_1.filterFiles)(files, ignorePaths) : files;
+    const tests = filteredFiles.filter((file) => file.endsWith('test.ts') ||
+        file.endsWith('spec.ts') ||
+        file.endsWith('test.js') ||
+        file.endsWith('spec.js'));
+    const result = tests.length > 0;
+    return {
+        name,
+        status: (0, calculatePass_1.calculatePass)(result, severity),
+        message,
+        path
+    };
+}
+exports.checkForPresenceTests = checkForPresenceTests;
+
+
+/***/ }),
+
+/***/ 555:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require2_) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.checkForThrowingPlainErrors = void 0;
+const calculatePass_1 = __nccwpck_require2_(906);
+const logDefaultPathMessage_1 = __nccwpck_require2_(664);
+const getAllFiles_1 = __nccwpck_require2_(424);
+const readFile_1 = __nccwpck_require2_(617);
+const filterFiles_1 = __nccwpck_require2_(73);
+/**
+ * @description Checks if plain (non-custom) errors are thrown.
+ */
+function checkForThrowingPlainErrors(severity, basePath, customPath, ignorePaths) {
+    const path = customPath || 'src';
+    const name = 'Error handling';
+    const message = 'Check for presence of plain (non-custom) errors';
+    if (!customPath)
+        (0, logDefaultPathMessage_1.logDefaultPathMessage)(name, path);
+    const files = (0, getAllFiles_1.getAllFiles)(`${basePath}/${path}`, []);
+    const filteredFiles = ignorePaths && ignorePaths.length > 0 ? (0, filterFiles_1.filterFiles)(files, ignorePaths) : files;
+    const regex = /(throw Error|throw new Error)(.*)/gi;
+    const includesError = filteredFiles.map((test) => regex.test((0, readFile_1.readFile)(test)));
+    const result = !includesError.includes(true);
+    return {
+        name,
+        status: (0, calculatePass_1.calculatePass)(result, severity),
+        message,
+        path
+    };
+}
+exports.checkForThrowingPlainErrors = checkForThrowingPlainErrors;
 
 
 /***/ }),
@@ -6980,6 +7154,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createNewStandardLint = void 0;
 const getStatusCount_1 = __nccwpck_require2_(214);
 const checkForConflictingLockfiles_1 = __nccwpck_require2_(517);
+const checkForConsoleUsage_1 = __nccwpck_require2_(687);
 const checkForDefinedRelations_1 = __nccwpck_require2_(145);
 const checkForDefinedServiceLevelObjectives_1 = __nccwpck_require2_(693);
 const checkForDefinedTags_1 = __nccwpck_require2_(624);
@@ -6996,43 +7171,77 @@ const checkForPresenceSecurity_1 = __nccwpck_require2_(889);
 const checkForPresenceServiceMetadata_1 = __nccwpck_require2_(837);
 const checkForPresenceTemplateIssues_1 = __nccwpck_require2_(691);
 const checkForPresenceTemplatePullRequests_1 = __nccwpck_require2_(500);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const checkForPresenceTests_1 = __nccwpck_require2_(943);
+const checkForThrowingPlainErrors_1 = __nccwpck_require2_(555);
+const exists_1 = __nccwpck_require2_(963);
 const errors_1 = __nccwpck_require2_(683);
-const DEFAULT_BASE_PATH_FALLBACK = '.';
-const DEFAULT_SEVERITY_FALLBACK = 'error';
+const writeResultsToDisk_1 = __nccwpck_require2_(47);
+/**
+ * @description Factory function to return a new `StandardLint` instance.
+ */
 function createNewStandardLint(config) {
     return new StandardLint(config);
 }
 exports.createNewStandardLint = createNewStandardLint;
+/**
+ * @description `StandardLint` is an extensible standards linter and auditor.
+ */
 class StandardLint {
     constructor(config) {
+        this.defaultBasePathFallback = '.';
+        this.defaultSeverityFallback = 'error';
+        this.defaultIgnorePathsFallback = [];
         this.config = this.makeConfig(config);
     }
+    /**
+     * @description Validates and sanitizes user input and returns a valid Configuration.
+     */
     makeConfig(configInput) {
-        const basePath = configInput?.basePath && (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(configInput.basePath)
+        const basePath = configInput?.basePath && (0, exists_1.exists)(configInput.basePath)
             ? configInput.basePath
-            : DEFAULT_BASE_PATH_FALLBACK;
+            : this.defaultBasePathFallback;
         const defaultSeverity = configInput?.defaultSeverity
             ? this.getValidatedSeverityLevel(configInput.defaultSeverity)
-            : DEFAULT_SEVERITY_FALLBACK;
+            : this.defaultSeverityFallback;
+        const ignorePaths = configInput?.ignorePaths
+            ? this.getSanitizedPaths(configInput.ignorePaths)
+            : this.defaultIgnorePathsFallback;
         const checkList = Array.isArray(configInput?.checks) ? configInput?.checks : [];
-        const checks = this.getValidatedChecks(checkList, defaultSeverity);
+        const checks = this.getValidatedChecks(checkList, defaultSeverity, ignorePaths);
         return {
             basePath,
             checks,
             defaultSeverity
         };
     }
+    /**
+     * @description Validates and sanitizes a requested Severity level.
+     */
     getValidatedSeverityLevel(severity) {
         const validSeverityLevels = ['warn', 'error'];
         if (validSeverityLevels.includes(severity))
             return severity;
-        return DEFAULT_SEVERITY_FALLBACK;
+        return this.defaultSeverityFallback;
     }
-    getValidatedChecks(checks, defaultSeverity) {
+    /**
+     * @description Sanitizes provided paths or return empty array if none is provided.
+     */
+    getSanitizedPaths(ignorePaths) {
+        if (ignorePaths.length === 0)
+            return [];
+        return ignorePaths.filter((path) => typeof path === 'string');
+    }
+    /**
+     * @description Validates and sanitizes a requested list of checks.
+     *
+     * Provide `defaultSeverity` as it's not yet available in the class `config` object
+     * when running the validation.
+     */
+    getValidatedChecks(checks, defaultSeverity, ignorePaths) {
         const validCheckNames = [
             'all',
             'checkForConflictingLockfiles',
+            'checkForConsoleUsage',
             'checkForDefinedRelations',
             'checkForDefinedServiceLevelObjectives',
             'checkForDefinedTags',
@@ -7048,7 +7257,9 @@ class StandardLint {
             'checkForPresenceSecurity',
             'checkForPresenceServiceMetadata',
             'checkForPresenceTemplateIssues',
-            'checkForPresenceTemplatePullRequests'
+            'checkForPresenceTemplatePullRequests',
+            'checkForPresenceTests',
+            'checkForThrowingPlainErrors'
         ];
         const isValidCheckName = (name) => validCheckNames.includes(name);
         if (checks.includes('all')) {
@@ -7060,36 +7271,49 @@ class StandardLint {
             if (typeof check === 'string' && isValidCheckName(check))
                 return {
                     name: check,
-                    severity: defaultSeverity
+                    severity: defaultSeverity,
+                    ignorePaths
                 };
             if (typeof check === 'object' && isValidCheckName(check.name))
                 return {
                     name: check.name,
-                    severity: this.getValidatedSeverityLevel(check.severity)
+                    path: check.path || '',
+                    severity: this.getValidatedSeverityLevel(check.severity || defaultSeverity),
+                    ignorePaths
                 };
+            // No match, remove in filter step
             return {
-                name: '',
-                severity: defaultSeverity
+                name: ''
             };
         })
             .filter((check) => check.name);
         return validatedChecks;
     }
-    check() {
+    /**
+     * @description Orchestrates the running of all checks.
+     */
+    check(writeOutputToDisk = false) {
         if (this.config.checks.length === 0)
             throw new errors_1.MissingChecksError();
         const results = this.config.checks.map((check) => this.test(check));
-        return {
+        const checkResults = {
             passes: (0, getStatusCount_1.getStatusCount)('pass', results),
             warnings: (0, getStatusCount_1.getStatusCount)('warn', results),
             failures: (0, getStatusCount_1.getStatusCount)('fail', results),
             results
         };
+        if (writeOutputToDisk)
+            (0, writeResultsToDisk_1.writeResultsToDisk)(checkResults);
+        return checkResults;
     }
+    /**
+     * @description Run test on an individual Check.
+     */
     test(check) {
-        const { name, severity, path } = check;
+        const { name, severity, path, ignorePaths } = check;
         const checksList = {
             checkForConflictingLockfiles: () => (0, checkForConflictingLockfiles_1.checkForConflictingLockfiles)(severity, this.config.basePath),
+            checkForConsoleUsage: () => (0, checkForConsoleUsage_1.checkForConsoleUsage)(severity, this.config.basePath, path, ignorePaths),
             checkForDefinedRelations: () => (0, checkForDefinedRelations_1.checkForDefinedRelations)(severity, this.config.basePath, path),
             checkForDefinedServiceLevelObjectives: () => (0, checkForDefinedServiceLevelObjectives_1.checkForDefinedServiceLevelObjectives)(severity, this.config.basePath, path),
             checkForDefinedTags: () => (0, checkForDefinedTags_1.checkForDefinedTags)(severity, this.config.basePath, path),
@@ -7105,12 +7329,17 @@ class StandardLint {
             checkForPresenceSecurity: () => (0, checkForPresenceSecurity_1.checkForPresenceSecurity)(severity, this.config.basePath),
             checkForPresenceServiceMetadata: () => (0, checkForPresenceServiceMetadata_1.checkForPresenceServiceMetadata)(severity, this.config.basePath, path),
             checkForPresenceTemplateIssues: () => (0, checkForPresenceTemplateIssues_1.checkForPresenceTemplateIssues)(severity, this.config.basePath, path),
-            checkForPresenceTemplatePullRequests: () => (0, checkForPresenceTemplatePullRequests_1.checkForPresenceTemplatePullRequests)(severity, this.config.basePath, path)
+            checkForPresenceTemplatePullRequests: () => (0, checkForPresenceTemplatePullRequests_1.checkForPresenceTemplatePullRequests)(severity, this.config.basePath, path),
+            checkForPresenceTests: () => (0, checkForPresenceTests_1.checkForPresenceTests)(severity, this.config.basePath, path, ignorePaths),
+            checkForThrowingPlainErrors: () => (0, checkForThrowingPlainErrors_1.checkForThrowingPlainErrors)(severity, this.config.basePath, path, ignorePaths)
         };
         const result = checksList[name]();
         this.logResult(result);
         return result;
     }
+    /**
+     * @description Outputs a log with the check result.
+     */
     logResult(checkResult) {
         const { status, name } = checkResult;
         if (status === 'pass')
@@ -7125,7 +7354,7 @@ class StandardLint {
 
 /***/ }),
 
-/***/ 277:
+/***/ 963:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require2_) {
 
 
@@ -7133,18 +7362,41 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.checkIfFileOrDirectoryExists = void 0;
+exports.exists = void 0;
 const fs_1 = __importDefault(__nccwpck_require2_(147));
 const path_1 = __importDefault(__nccwpck_require2_(17));
-function checkIfFileOrDirectoryExists(basePath, additionalPath = '') {
+/**
+ * @description Checks if the provided path is an actual file or directory.
+ */
+function exists(basePath, additionalPath = '') {
     return fs_1.default.existsSync(path_1.default.join(basePath, additionalPath));
 }
-exports.checkIfFileOrDirectoryExists = checkIfFileOrDirectoryExists;
+exports.exists = exists;
 
 
 /***/ }),
 
-/***/ 141:
+/***/ 73:
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.filterFiles = void 0;
+/**
+ * @description Filters out file paths based on provided ignore paths.
+ */
+function filterFiles(files, ignorePaths) {
+    return files.filter((file) => ignorePaths.every((ignorePath) => {
+        const localFilePath = file.replace(process.cwd(), ''); // This is so we don't catch on other file paths in the system
+        return !localFilePath.includes(ignorePath);
+    }));
+}
+exports.filterFiles = filterFiles;
+
+
+/***/ }),
+
+/***/ 424:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require2_) {
 
 
@@ -7152,16 +7404,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getDirectoryContents = void 0;
-const fs_1 = __importDefault(__nccwpck_require2_(147));
+exports.getAllFiles = void 0;
 const path_1 = __importDefault(__nccwpck_require2_(17));
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
-function getDirectoryContents(basePath) {
-    if ((0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(path_1.default.join(basePath)))
-        return fs_1.default.readdirSync(path_1.default.join(basePath));
-    return [];
+const readDirectory_1 = __nccwpck_require2_(128);
+const isDirectory_1 = __nccwpck_require2_(698);
+/**
+ * @description Gets a list of all files in a recursive manner.
+ */
+function getAllFiles(directoryPath, arrayOfFiles) {
+    const files = (0, readDirectory_1.readDirectory)(directoryPath);
+    files.forEach((file) => {
+        const filePath = `${directoryPath}/${file}`;
+        if ((0, isDirectory_1.isDirectory)(filePath))
+            arrayOfFiles = getAllFiles(filePath, arrayOfFiles);
+        else
+            arrayOfFiles.push(path_1.default.join(process.cwd(), '/', filePath));
+    });
+    return arrayOfFiles.filter((file) => file);
 }
-exports.getDirectoryContents = getDirectoryContents;
+exports.getAllFiles = getAllFiles;
 
 
 /***/ }),
@@ -7175,15 +7436,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getJSONFileContents = void 0;
-const fs_1 = __importDefault(__nccwpck_require2_(147));
 const path_1 = __importDefault(__nccwpck_require2_(17));
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const exists_1 = __nccwpck_require2_(963);
+const readFile_1 = __nccwpck_require2_(617);
 function getJSONFileContents(basePath, filePath) {
     try {
         const fullPath = path_1.default.join(basePath, filePath);
-        if ((0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)(fullPath)) {
-            return JSON.parse(fs_1.default.readFileSync(fullPath, 'utf8'));
-        }
+        if ((0, exists_1.exists)(fullPath))
+            return JSON.parse((0, readFile_1.readFile)(fullPath));
         return {};
     }
     catch (error) {
@@ -7196,16 +7456,109 @@ exports.getJSONFileContents = getJSONFileContents;
 
 /***/ }),
 
+/***/ 698:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require2_) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isDirectory = void 0;
+const fs_1 = __importDefault(__nccwpck_require2_(147));
+/**
+ * @description Checks if a path is a directory.
+ */
+function isDirectory(path) {
+    return fs_1.default.statSync(path).isDirectory();
+}
+exports.isDirectory = isDirectory;
+
+
+/***/ }),
+
 /***/ 664:
 /***/ ((__unused_webpack_module, exports) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.logDefaultPathMessage = void 0;
+/**
+ * @description Outputs a warning log when a default path is being used.
+ */
 function logDefaultPathMessage(checkName, path) {
     console.warn(`🛎️  No custom path assigned to check "${checkName}" - Using default path "${path}"...`);
 }
 exports.logDefaultPathMessage = logDefaultPathMessage;
+
+
+/***/ }),
+
+/***/ 128:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require2_) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.readDirectory = void 0;
+const fs_1 = __importDefault(__nccwpck_require2_(147));
+const path_1 = __importDefault(__nccwpck_require2_(17));
+const exists_1 = __nccwpck_require2_(963);
+/**
+ * @description Gets the contents of a directory as an array of strings.
+ */
+function readDirectory(basePath) {
+    const _path = path_1.default.join(basePath);
+    if ((0, exists_1.exists)(_path))
+        return fs_1.default.readdirSync(_path);
+    return [];
+}
+exports.readDirectory = readDirectory;
+
+
+/***/ }),
+
+/***/ 617:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require2_) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.readFile = void 0;
+const fs_1 = __importDefault(__nccwpck_require2_(147));
+/**
+ * @description Reads back the contents of a file.
+ */
+function readFile(file) {
+    return fs_1.default.readFileSync(file, { encoding: 'utf8' });
+}
+exports.readFile = readFile;
+
+
+/***/ }),
+
+/***/ 47:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require2_) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.writeResultsToDisk = void 0;
+const fs_1 = __importDefault(__nccwpck_require2_(147));
+/**
+ * @description Writes a file to disk with results.
+ */
+function writeResultsToDisk(data) {
+    const fileName = 'standardlint.results.json';
+    fs_1.default.writeFileSync(`${process.cwd()}/${fileName}`, JSON.stringify(data, null, '\t'));
+}
+exports.writeResultsToDisk = writeResultsToDisk;
 
 
 /***/ }),
@@ -7270,19 +7623,23 @@ var exports = __webpack_exports__;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createNewStandardLint = void 0;
 const StandardLint_1 = __nccwpck_require2_(783);
-const checkIfFileOrDirectoryExists_1 = __nccwpck_require2_(277);
+const exists_1 = __nccwpck_require2_(963);
 const getJSONFileContents_1 = __nccwpck_require2_(841);
+const writeResultsToDisk_1 = __nccwpck_require2_(47);
 function main() {
-    const isRunFromCommandLine = process.argv[1].includes('node_modules/.bin/standardlint');
+    const isRunFromCommandLine = process.argv[1] && process.argv[1].includes('node_modules/.bin/standardlint');
     if (!isRunFromCommandLine)
         return;
+    const writeOutputToDisk = process.argv[2] && process.argv[2].includes('--output');
     try {
         console.log('Running StandardLint...');
-        const config = (0, checkIfFileOrDirectoryExists_1.checkIfFileOrDirectoryExists)('standardlint.json')
+        const config = (0, exists_1.exists)('standardlint.json')
             ? (0, getJSONFileContents_1.getJSONFileContents)(process.cwd(), 'standardlint.json')
             : {};
         const standardlint = (0, StandardLint_1.createNewStandardLint)(config);
-        return standardlint.check();
+        const results = standardlint.check();
+        if (writeOutputToDisk)
+            (0, writeResultsToDisk_1.writeResultsToDisk)(results);
     }
     catch (error) {
         console.error(error);
@@ -7518,12 +7875,16 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
-/* global global, define, System, Reflect, Promise */
+/* global global, define, Symbol, Reflect, Promise, SuppressedError */
 var __extends;
 var __assign;
 var __rest;
 var __decorate;
 var __param;
+var __esDecorate;
+var __runInitializers;
+var __propKey;
+var __setFunctionName;
 var __metadata;
 var __awaiter;
 var __generator;
@@ -7544,6 +7905,8 @@ var __classPrivateFieldGet;
 var __classPrivateFieldSet;
 var __classPrivateFieldIn;
 var __createBinding;
+var __addDisposableResource;
+var __disposeResources;
 (function (factory) {
     var root = typeof global === "object" ? global : typeof self === "object" ? self : typeof this === "object" ? this : {};
     if (typeof define === "function" && define.amd) {
@@ -7609,6 +7972,51 @@ var __createBinding;
 
     __param = function (paramIndex, decorator) {
         return function (target, key) { decorator(target, key, paramIndex); }
+    };
+
+    __esDecorate = function (ctor, descriptorIn, decorators, contextIn, initializers, extraInitializers) {
+        function accept(f) { if (f !== void 0 && typeof f !== "function") throw new TypeError("Function expected"); return f; }
+        var kind = contextIn.kind, key = kind === "getter" ? "get" : kind === "setter" ? "set" : "value";
+        var target = !descriptorIn && ctor ? contextIn["static"] ? ctor : ctor.prototype : null;
+        var descriptor = descriptorIn || (target ? Object.getOwnPropertyDescriptor(target, contextIn.name) : {});
+        var _, done = false;
+        for (var i = decorators.length - 1; i >= 0; i--) {
+            var context = {};
+            for (var p in contextIn) context[p] = p === "access" ? {} : contextIn[p];
+            for (var p in contextIn.access) context.access[p] = contextIn.access[p];
+            context.addInitializer = function (f) { if (done) throw new TypeError("Cannot add initializers after decoration has completed"); extraInitializers.push(accept(f || null)); };
+            var result = (0, decorators[i])(kind === "accessor" ? { get: descriptor.get, set: descriptor.set } : descriptor[key], context);
+            if (kind === "accessor") {
+                if (result === void 0) continue;
+                if (result === null || typeof result !== "object") throw new TypeError("Object expected");
+                if (_ = accept(result.get)) descriptor.get = _;
+                if (_ = accept(result.set)) descriptor.set = _;
+                if (_ = accept(result.init)) initializers.unshift(_);
+            }
+            else if (_ = accept(result)) {
+                if (kind === "field") initializers.unshift(_);
+                else descriptor[key] = _;
+            }
+        }
+        if (target) Object.defineProperty(target, contextIn.name, descriptor);
+        done = true;
+    };
+
+    __runInitializers = function (thisArg, initializers, value) {
+        var useValue = arguments.length > 2;
+        for (var i = 0; i < initializers.length; i++) {
+            value = useValue ? initializers[i].call(thisArg, value) : initializers[i].call(thisArg);
+        }
+        return useValue ? value : void 0;
+    };
+
+    __propKey = function (x) {
+        return typeof x === "symbol" ? x : "".concat(x);
+    };
+
+    __setFunctionName = function (f, name, prefix) {
+        if (typeof name === "symbol") name = name.description ? "[".concat(name.description, "]") : "";
+        return Object.defineProperty(f, "name", { configurable: true, value: prefix ? "".concat(prefix, " ", name) : name });
     };
 
     __metadata = function (metadataKey, metadataValue) {
@@ -7743,7 +8151,7 @@ var __createBinding;
     __asyncDelegator = function (o) {
         var i, p;
         return i = {}, verb("next"), verb("throw", function (e) { throw e; }), verb("return"), i[Symbol.iterator] = function () { return this; }, i;
-        function verb(n, f) { i[n] = o[n] ? function (v) { return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v; } : f; }
+        function verb(n, f) { i[n] = o[n] ? function (v) { return (p = !p) ? { value: __await(o[n](v)), done: false } : f ? f(v) : v; } : f; }
     };
 
     __asyncValues = function (o) {
@@ -7795,11 +8203,62 @@ var __createBinding;
         return typeof state === "function" ? receiver === state : state.has(receiver);
     };
 
+    __addDisposableResource = function (env, value, async) {
+        if (value !== null && value !== void 0) {
+            if (typeof value !== "object") throw new TypeError("Object expected.");
+            var dispose;
+            if (async) {
+                if (!Symbol.asyncDispose) throw new TypeError("Symbol.asyncDispose is not defined.");
+                dispose = value[Symbol.asyncDispose];
+            }
+            if (dispose === void 0) {
+                if (!Symbol.dispose) throw new TypeError("Symbol.dispose is not defined.");
+                dispose = value[Symbol.dispose];
+            }
+            if (typeof dispose !== "function") throw new TypeError("Object not disposable.");
+            env.stack.push({ value: value, dispose: dispose, async: async });
+        }
+        else if (async) {
+            env.stack.push({ async: true });
+        }
+        return value;
+    };
+
+    var _SuppressedError = typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
+        var e = new Error(message);
+        return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+    };
+
+    __disposeResources = function (env) {
+        function fail(e) {
+            env.error = env.hasError ? new _SuppressedError(e, env.error, "An error was suppressed during disposal.") : e;
+            env.hasError = true;
+        }
+        function next() {
+            while (env.stack.length) {
+                var rec = env.stack.pop();
+                try {
+                    var result = rec.dispose && rec.dispose.call(rec.value);
+                    if (rec.async) return Promise.resolve(result).then(next, function(e) { fail(e); return next(); });
+                }
+                catch (e) {
+                    fail(e);
+                }
+            }
+            if (env.hasError) throw env.error;
+        }
+        return next();
+    };
+
     exporter("__extends", __extends);
     exporter("__assign", __assign);
     exporter("__rest", __rest);
     exporter("__decorate", __decorate);
     exporter("__param", __param);
+    exporter("__esDecorate", __esDecorate);
+    exporter("__runInitializers", __runInitializers);
+    exporter("__propKey", __propKey);
+    exporter("__setFunctionName", __setFunctionName);
     exporter("__metadata", __metadata);
     exporter("__awaiter", __awaiter);
     exporter("__generator", __generator);
@@ -7820,6 +8279,8 @@ var __createBinding;
     exporter("__classPrivateFieldGet", __classPrivateFieldGet);
     exporter("__classPrivateFieldSet", __classPrivateFieldSet);
     exporter("__classPrivateFieldIn", __classPrivateFieldIn);
+    exporter("__addDisposableResource", __addDisposableResource);
+    exporter("__disposeResources", __disposeResources);
 });
 
 
